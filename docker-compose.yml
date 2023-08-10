@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        - RUBY_VERSION=$RUBY_VERSION
+        - RAILS_USER=$RAILS_USER
+        - GEM_HOME=$GEM_HOME
+    volumes:
+      - .:/app
+      - gems:$GEM_HOME
+    ports:
+      - "3000:3000"
+    env_file:
+      - ".env"
+    environment:
+      RAILS_ENV: development
+    tty: true
+    stdin_open: true
+    command: rails server -p 3000 -b '0.0.0.0'
+
+  database:
+    image: postgres:15.3
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pass
+
+volumes:
+  gems:
+  db_data:
