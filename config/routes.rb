@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  root 'barbecues#index'
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  resources :sessions, only: %i[new]
+
+  scope '/oauth' do
+    get 'authorize', to: 'oauth#authorize', as: 'oauth_authorize'
+    get 'callback', to: 'oauth#callback', as: 'oauth_callback'
+  end
 end
