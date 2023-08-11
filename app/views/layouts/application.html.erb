@@ -30,8 +30,13 @@
           <li><a href="#" class="nav-link px-2">Churrascos</a></li>
         </ul>
 
-        <div class="col-md-3 text-end d-flex align-items-center column-gap-5">
-          <span>Olá Name Here</span>
+        <div class="col-md-3 text-end d-flex align-items-center column-gap-3">
+          <div class="dropdown">
+            <span data-bs-toggle="dropdown" >Olá <%= @user.name %></span>
+            <ul class="dropdown-menu text-small shadow">
+              <li><span class="dropdown-item"><%= @user.email %></span></li>
+            </ul>
+          </div>
           <button type="button" class="btn btn-outline-primary me-2">Logout</button>
         </div>
       </header>
