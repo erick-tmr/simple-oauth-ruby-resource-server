@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
   root 'barbecues#index'
 
-  resources :sessions, only: %i[new]
+  get 'sessions/new', to: 'sessions#new', as: 'new_session'
+  delete 'sessions/destroy', to: 'sessions#destroy', as: 'destroy_session'
+
+  resources :barbecues, only: %i[index new create]
 
   scope '/oauth' do
     get 'authorize', to: 'oauth#authorize', as: 'oauth_authorize'

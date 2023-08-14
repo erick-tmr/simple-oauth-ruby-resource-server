@@ -1,6 +1,6 @@
 <div class="container">
   <div class="row">
-    <h1>Barbecues</h1>
+    <h1>Churrascos</h1>
 
     <% if @barbecues.empty? %>
       <p>There is no Barbecues created for Workspace <%= @workspace['id'] %> / <%= @workspace['name'] %></p>
@@ -15,23 +15,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td colspan="2">Larry the Bird</td>
-            <td>@twitter</td>
-          </tr>
+          <% @barbecues.each do |barbecue| %>
+            <tr>
+              <th scope="row"><%= barbecue.id %></th>
+              <td><%= barbecue.name %></td>
+              <td><%= barbecue.owner.name %></td>
+              <td><%= barbecue.owner.email %></td>
+            </tr>
+          <% end %>
         </tbody>
       </table>
     <% end %>

@@ -1,0 +1,19 @@
+<div class="container">
+  <%= render 'shared/flash_notifications' %>
+
+  <h1>Criar Churrasco</h1>
+
+  <%= form_with model: @barbecue, class: "row g-3 w-75" do |form| %>
+    <div class="col-12">
+      <%= form.label :name, class: "form-label" %>
+      <%= form.text_field :name, class: "form-control" %>
+    </div>
+    <div class="col-12">
+      <%= form.label :workspace_id, class: "form-label" %>
+      <%= form.select :workspace_id, @workspace_options, {}, class: "form-select" %>
+    </div>
+    <div class="col-12">
+      <%= form.submit class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
