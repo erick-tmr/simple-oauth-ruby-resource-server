@@ -2,8 +2,7 @@
 
 module JwtAuthenticated
   extend ActiveSupport::Concern
-
-  JWT_ERRORS = [JWT::ExpiredSignature, JWT::InvalidIssuerError, JWT::InvalidAudError].freeze
+  include JwtValidatable
 
   included do
     before_action :fetch_jwt
@@ -11,7 +10,7 @@ module JwtAuthenticated
     before_action :respond_expired_jwt
     before_action :populate_workspaces
 
-    rescue_from(*JWT_ERRORS, with: :jwt_error_response)
+    rescue_from(*JwtValidatable::JWT_ERRORS, with: :jwt_error_response)
   end
 
   private
@@ -35,22 +34,6 @@ module JwtAuthenticated
     end
   end
 
-  def validate_jwt(jwt)
-    payload, _header = JWT.decode(jwt, nil, true, {
-                                    algorithm: 'RS256',
-                                    iss: "#{ENV['IUGU_BASE_URL']}/",
-                                    verify_iss: true,
-                                    aud: ['Iugu.Platform', "Iugu.Platform.#{ENV['IUGU_CLIENT_ID']}"],
-                                    verify_aud: true,
-                                    jwks:
-                                  })
-    payload
-  end
-
-  def jwks
-    @jwks ||= JSON.parse(Faraday.get(ENV['IUGU_JWKS_URL']).body)
-  end
-
   def find_user
     return if @user
     return redirect_to new_session_path, alert: 'Login again!' unless session[:user_id]
@@ -61,10 +44,7 @@ module JwtAuthenticated
   end
 
   def populate_workspaces
-    @workspaces = Rails.cache.fetch("#{@user.id}/workspaces") || []
-    @workspace = @workspaces.detect do |workspace|
-      session['current_workspace_id'] == workspace['id']
-    end
+    set_workspace_variables
 
     return if @workspace
 
@@ -74,8 +54,17 @@ module JwtAuthenticated
       response['workspaces']
     end
     session['current_workspace_id'] = response['current']
-    @workspace = Rails.cache.fetch("#{@user.id}/workspaces").detect do |workspace|
+
+    set_workspace_variables
+  end
+
+  def set_workspace_variables
+    @workspaces = Rails.cache.fetch("#{@user.id}/workspaces") || []
+    @workspace = @workspaces.detect do |workspace|
       session['current_workspace_id'] == workspace['id']
+    end
+    @workspace_options = @workspaces.map do |workspace|
+      [workspace['name'], workspace['id']]
     end
   end
 

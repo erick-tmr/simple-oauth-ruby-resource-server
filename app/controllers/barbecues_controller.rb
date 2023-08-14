@@ -7,9 +7,6 @@ class BarbecuesController < ProtectedController
 
   def new
     @barbecue = Barbecue.new
-    @workspace_options = @workspaces.map do |workspace|
-      [workspace['name'], workspace['id']]
-    end
   end
 
   def create

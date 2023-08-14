@@ -27,7 +27,7 @@
         </div>
 
         <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="#" class="nav-link px-2">Churrascos</a></li>
+          <li><%= link_to 'Churrascos', barbecues_path, class: 'nav-link px-2' %></li>
           <li><%= link_to 'Criar Churrasco', new_barbecue_path, class: 'nav-link px-2' %></li>
         </ul>
 
@@ -38,6 +38,13 @@
               <li><span class="dropdown-item"><%= @user.email %></span></li>
             </ul>
           </div>
+          <%= form_with url: select_workspace_path, class: "row g-1 w-25", data: { turbo_method: :post } do |form| %>
+            <%= form.select :workspace_id,
+                      @workspace_options,
+                      { selected: session['current_workspace_id'] },
+                      { class: "form-select" } %>
+            <%= form.submit 'Trocar', class: "btn btn-primary" %>
+          <% end %>
           <%= link_to 'Logout', destroy_session_path, data: { turbo_method: :delete }, class: "btn btn-outline-primary me-2" %>
         </div>
       </header>
