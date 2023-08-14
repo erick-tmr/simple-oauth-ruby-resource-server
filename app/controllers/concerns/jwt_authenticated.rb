@@ -9,6 +9,7 @@ module JwtAuthenticated
     before_action :fetch_jwt
     before_action :find_user
     before_action :respond_expired_jwt
+    before_action :populate_workspaces
 
     rescue_from(*JWT_ERRORS, with: :jwt_error_response)
   end
@@ -54,7 +55,28 @@ module JwtAuthenticated
     return if @user
     return redirect_to new_session_path, alert: 'Login again!' unless session[:user_id]
 
-    @user = User.find(session[:user_id])
+    @user = User.find_by(id: session[:user_id])
+
+    redirect_to new_session_path, alert: 'Login again!' unless @user
+  end
+
+  def populate_workspaces
+    @workspaces = Rails.cache.fetch("#{@user.id}/workspaces") || []
+    @workspace = @workspaces.detect do |workspace|
+      session['current_workspace_id'] == workspace['id']
+    end
+
+    return if @workspace
+
+    response = api_http_client.get('workspaces').body
+
+    @workspaces = Rails.cache.fetch("#{@user.id}/workspaces") do
+      response['workspaces']
+    end
+    session['current_workspace_id'] = response['current']
+    @workspace = Rails.cache.fetch("#{@user.id}/workspaces").detect do |workspace|
+      session['current_workspace_id'] == workspace['id']
+    end
   end
 
   def respond_expired_jwt
@@ -66,5 +88,9 @@ module JwtAuthenticated
 
   def jwt_error_response
     redirect_to new_session_path, alert: 'JWT Parsing error (expiration, signature, etc), Try to login again!'
+  end
+
+  def api_http_client
+    @api_http_client ||= HttpClient.new(ENV['IUGU_API_BASE_URL'], jwt: Rails.cache.fetch("#{@user.id}/access_token_jwt"))
   end
 end

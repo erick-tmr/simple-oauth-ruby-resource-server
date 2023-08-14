@@ -1,0 +1,2 @@
+CREATE USER oauth_user WITH PASSWORD 'pass';
+ALTER USER oauth_user WITH SUPERUSER;
