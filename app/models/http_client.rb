@@ -15,4 +15,8 @@ class HttpClient
   def get(path, params: nil, headers: nil)
     @conn.get(path, params, headers)
   end
+
+  def post(path, body: nil, headers: nil)
+    @conn.post(path, body, headers)
+  end
 end

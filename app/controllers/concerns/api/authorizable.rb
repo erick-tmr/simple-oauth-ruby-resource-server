@@ -10,6 +10,17 @@ module Api
       before_action :refresh_console_token
     end
 
+    def authorize_action(action_name, workspace_id)
+      authorize_body = {
+        w: workspace_id,
+        p: @token['sub'],
+        a: action_name
+      }
+
+      response = indentity_http_client.post('verify', body: authorize_body)
+      @authorized = response.body == '1'
+    end
+
     private
 
     def refresh_console_token
