@@ -12,4 +12,8 @@ Rails.application.routes.draw do
     get 'authorize', to: 'oauth#authorize', as: 'oauth_authorize'
     get 'callback', to: 'oauth#callback', as: 'oauth_callback'
   end
+
+  namespace 'api' do
+    resources :barbecues, only: %i[index create]
+  end
 end

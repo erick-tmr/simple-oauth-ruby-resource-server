@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Api
-  class BarbecuesController < BaseController
+  class BarbecuesController < Api::BaseController
     def index
       barbecues = Barbecue.all
     end

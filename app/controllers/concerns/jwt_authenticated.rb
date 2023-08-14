@@ -3,6 +3,7 @@
 module JwtAuthenticated
   extend ActiveSupport::Concern
   include JwtValidatable
+  include Oauth2Clientable
 
   included do
     before_action :fetch_jwt
@@ -18,14 +19,10 @@ module JwtAuthenticated
   def fetch_jwt
     return unless Rails.cache.fetch("#{cookies.signed[:oauth_state]}/code")
 
-    client = OAuth2::Client.new(ENV['IUGU_CLIENT_ID'], ENV['IUGU_CLIENT_SECRET'],
-                                site: ENV['IUGU_BASE_URL'],
-                                token_url: '/token',
-                                redirect_uri: ENV['OAUTH_CALLBACK_URL'])
     auth_code = Rails.cache.fetch("#{cookies.signed[:oauth_state]}/code")
     cookies.delete(:oauth_state)
 
-    access_token = client.auth_code.get_token(auth_code)
+    access_token = oauth2_client.auth_code.get_token(auth_code)
     payload = validate_jwt(access_token.response.parsed['id_token'])
     @user = User.find_or_create_by(name: payload['name'], email: payload['email'])
     session[:user_id] = @user.id

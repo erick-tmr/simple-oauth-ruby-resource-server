@@ -3,5 +3,6 @@
 module Api
   class BaseController < ActionController::API
     include JwtAuthenticated
+    include Authorizable
   end
 end

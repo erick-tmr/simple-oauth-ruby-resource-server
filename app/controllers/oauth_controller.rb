@@ -1,16 +1,13 @@
 # frozen_string_literal: true
 
 class OauthController < ApplicationController
+  include Oauth2Clientable
+
   def authorize
     state = SecureRandom.uuid
     cookies.signed[:oauth_state] = state
 
-    client = OAuth2::Client.new(ENV['IUGU_CLIENT_ID'], ENV['IUGU_CLIENT_SECRET'],
-                                site: ENV['IUGU_BASE_URL'],
-                                authorize_url: '/authorize',
-                                redirect_uri: ENV['OAUTH_CALLBACK_URL'])
-
-    redirect_to client.auth_code.authorize_url(state:), allow_other_host: true
+    redirect_to oauth2_client.auth_code.authorize_url(state:), allow_other_host: true
   end
 
   def callback

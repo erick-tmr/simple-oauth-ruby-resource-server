@@ -8,7 +8,7 @@ module JwtValidatable
                                     algorithm: 'RS256',
                                     iss: "#{ENV['IUGU_BASE_URL']}/",
                                     verify_iss: true,
-                                    aud: ['Iugu.Platform', "Iugu.Platform.#{ENV['IUGU_CLIENT_ID']}"],
+                                    aud: ["Iugu.Platform.#{ENV['IUGU_CLIENT_ID']}"],
                                     verify_aud: true,
                                     jwks:
                                   })
