@@ -2,14 +2,24 @@
 
 class BarbecuesController < ProtectedController
   def index
+    authorize_action('churrasco:barbecues.list', @workspace['id'], session[:user_subject])
+
     @barbecues = Barbecue.where(workspace_id: @workspace['id'], owner: @user)
   end
 
   def new
+    authorize_action('churrasco:barbecues.create', @workspace['id'], session[:user_subject])
+
+    return redirect_back fallback_location: root_path, alert: 'Not Authorized to Create Barbecue' unless @authorized
+
     @barbecue = Barbecue.new
   end
 
   def create
+    authorize_action('churrasco:barbecues.create', @workspace['id'], session[:user_subject])
+
+    return redirect_back fallback_location: root_path, alert: 'Not Authorized to Create Barbecue' unless @authorized
+
     create_params = barbecue_params.merge(owner: @user)
     @barbecue = Barbecue.new(create_params)
 

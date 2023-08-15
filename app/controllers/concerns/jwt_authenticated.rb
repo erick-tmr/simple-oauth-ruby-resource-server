@@ -26,6 +26,7 @@ module JwtAuthenticated
     payload = validate_jwt(access_token.response.parsed['id_token'])
     @user = User.find_or_create_by(name: payload['name'], email: payload['email'])
     session[:user_id] = @user.id
+    session[:user_subject] = payload['sub']
     Rails.cache.fetch("#{@user.id}/access_token_jwt", expires_in: (4.hours - 5.minutes)) do
       access_token.response.parsed['id_token']
     end

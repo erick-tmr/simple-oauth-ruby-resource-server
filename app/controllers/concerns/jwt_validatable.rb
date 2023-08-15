@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module JwtValidatable
-  JWT_ERRORS = [JWT::ExpiredSignature, JWT::InvalidIssuerError, JWT::InvalidAudError].freeze
+  JWT_ERRORS = [JWT::ExpiredSignature, JWT::InvalidIssuerError, JWT::InvalidAudError, JWT::DecodeError].freeze
 
   def validate_jwt(jwt)
     payload, _header = JWT.decode(jwt, nil, true, {

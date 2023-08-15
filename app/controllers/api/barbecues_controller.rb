@@ -3,7 +3,7 @@
 module Api
   class BarbecuesController < Api::BaseController
     def index
-      authorize_action('churrasco:barbecues.list', params[:workspace_id])
+      authorize_action('churrasco:barbecues.list', params[:workspace_id], @token['sub'])
 
       return render json: { error: 'Not authorize to execute churrasco:barbecues.list' } unless @authorized
 
@@ -12,7 +12,7 @@ module Api
     end
 
     def create
-      authorize_action('churrasco:barbecues.create', params[:workspace_id])
+      authorize_action('churrasco:barbecues.create', params[:workspace_id], @token['sub'])
 
       barbecue = Barbecue.new
     end

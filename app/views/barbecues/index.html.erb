@@ -1,30 +1,34 @@
 <div class="container">
   <div class="row">
-    <h1>Churrascos</h1>
+    <% if @authorized %>
+      <h1>Churrascos</h1>
 
-    <% if @barbecues.empty? %>
-      <p>There is no Barbecues created for Workspace <%= @workspace['id'] %> / <%= @workspace['name'] %></p>
-    <% else %>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">#ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Owner Name</th>
-            <th scope="col">Owner Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @barbecues.each do |barbecue| %>
+      <% if @barbecues.empty? %>
+        <p>There is no Barbecues created for Workspace <%= @workspace['id'] %> / <%= @workspace['name'] %></p>
+      <% else %>
+        <table class="table">
+          <thead>
             <tr>
-              <th scope="row"><%= barbecue.id %></th>
-              <td><%= barbecue.name %></td>
-              <td><%= barbecue.owner.name %></td>
-              <td><%= barbecue.owner.email %></td>
+              <th scope="col">#ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">Owner Name</th>
+              <th scope="col">Owner Email</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <% @barbecues.each do |barbecue| %>
+              <tr>
+                <th scope="row"><%= barbecue.id %></th>
+                <td><%= barbecue.name %></td>
+                <td><%= barbecue.owner.name %></td>
+                <td><%= barbecue.owner.email %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    <% else %>
+      <p>User is not authorized to view Barbecues List</p>
     <% end %>
   </div>
 </div>

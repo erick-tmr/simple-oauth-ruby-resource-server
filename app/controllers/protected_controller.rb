@@ -2,4 +2,5 @@
 
 class ProtectedController < ApplicationController
   include JwtAuthenticated
+  include Authorizable
 end
