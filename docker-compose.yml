@@ -31,6 +31,9 @@ services:
     environment:
       - POSTGRES_PASSWORD=pass
 
+  redis:
+    image: redis:7.0.12
+
 volumes:
   gems:
   db_data:
