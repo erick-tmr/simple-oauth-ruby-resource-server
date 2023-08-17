@@ -23,13 +23,9 @@ module JwtAuthenticated
     cookies.delete(:oauth_state)
 
     access_token = oauth2_client.auth_code.get_token(auth_code)
-    payload = validate_jwt(access_token.response.parsed['id_token'])
-    @user = User.find_or_create_by(name: payload['name'], email: payload['email'])
+    payload = validate_and_store_jwt(access_token)
     session[:user_id] = @user.id
     session[:user_subject] = payload['sub']
-    Rails.cache.fetch("#{@user.id}/access_token_jwt", expires_in: (4.hours - 5.minutes)) do
-      access_token.response.parsed['id_token']
-    end
   end
 
   def find_user
@@ -57,7 +53,7 @@ module JwtAuthenticated
   end
 
   def set_workspace_variables
-    @workspaces = Rails.cache.fetch("#{@user.id}/workspaces") || []
+    @workspaces = Rails.cache.read("#{@user.id}/workspaces") || []
     @workspace = @workspaces.detect do |workspace|
       session['current_workspace_id'] == workspace['id']
     end
@@ -67,10 +63,46 @@ module JwtAuthenticated
   end
 
   def respond_expired_jwt
-    return if Rails.cache.fetch("#{@user.id}/access_token_jwt")
+    return if Rails.cache.read("#{@user.id}/access_token_jwt")
+    return if refresh_token
 
     session.delete(:user_id)
     redirect_to new_session_path, alert: 'Login again!'
+  end
+
+  def refresh_token
+    return false unless Rails.cache.read("#{@user.id}/access_token_hash")
+
+    access_token = OAuth2::AccessToken.from_hash(
+      oauth2_client,
+      Rails.cache.read("#{@user.id}/access_token_hash")
+    )
+
+    begin
+      new_access_token = access_token.refresh
+    rescue OAuth2::Error
+      return false
+    end
+
+    validate_and_store_jwt(new_access_token)
+  end
+
+  def validate_and_store_jwt(access_token)
+    payload = validate_jwt(access_token.response.parsed['id_token'])
+    token_ttl = (Time.at(payload['exp']) - Time.zone.now).to_i - 30
+    @user ||= User.find_or_create_by(name: payload['name'], email: payload['email'])
+    Rails.cache.write(
+      "#{@user.id}/access_token_jwt",
+      access_token.response.parsed['id_token'],
+      expires_in: token_ttl
+    )
+    Rails.cache.write(
+      "#{@user.id}/access_token_hash",
+      access_token.to_hash,
+      expires_in: (token_ttl + 13.minutes)
+    )
+
+    payload
   end
 
   def jwt_error_response
@@ -78,6 +110,6 @@ module JwtAuthenticated
   end
 
   def api_http_client
-    @api_http_client ||= HttpClient.new(ENV['IUGU_API_BASE_URL'], jwt: Rails.cache.fetch("#{@user.id}/access_token_jwt"))
+    @api_http_client ||= HttpClient.new(ENV['IUGU_API_BASE_URL'], jwt: Rails.cache.read("#{@user.id}/access_token_jwt"))
   end
 end
